@@ -15,7 +15,9 @@ public interface GoodsMapper {
 	public GoodsDTO selectOne(String goodsNum);
 	public int goodsUpdate(GoodsDTO dto);
 	public int goodsDelete(String goodsNum);
-	public String goodsAutoNum();
+	public String goodsAutoNum(	@Param("tableName") String tableName
+							   ,@Param("columnName") String columnName
+							   ,@Param("sep") String sep);
 	public int goodsCount(String searchWord);
 	public int productsDelete(@Param("products") String products[]);
 }
