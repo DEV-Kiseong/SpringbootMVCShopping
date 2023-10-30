@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC    
+   "-//mybatis.org//DTD Mapper 3.0//EN" 
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="springBootMVCShopping.mapper.MemberMapper">
+
+<sql id="memberColumnsBase">
+               member_num memberNum,member_id memberId,member_pw memberPw,member_name memberName,member_addr memberAddr
+               , member_addr_detail memberAddrDetail, member_post memberPost, member_phone1 memberPhone1,member_phone2 memberPhone2
+               , member_regist memberRegist, member_birth memberBirth,  member_email memberEmail, member_email_conf memberEmailConf
+               , point , gender
+
+</sql>
+
+
+
+<insert id="memberInsert" parameterType="mem">
+insert into members(member_num,member_id,member_pw,member_name,member_addr
+               , member_addr_detail, member_post, member_phone1,member_phone2
+               , member_regist, member_birth, gender, member_email, member_email_conf
+               , point) 
+values            (#{memberNum},#{memberId},#{memberPw},#{memberName},#{memberAddr}
+               ,#{memberAddrDetail},#{memberPost},#{memberPhone1},#{memberPhone2}
+               ,now(),#{memberBirth},#{gender},#{memberEmail},'T',0);
+</insert>
+
+<select id = "selectAll" resultType="mem" parameterType="startEndPageDTO">
+select * 
+from ( select row_number()over (order by member_num) as rn,
+   <include refid="memberColumnsBase" />
+   from members
+   <where>
+   <if test="searchWord != null">
+		member_name like '%'|| #{searchWord}|| '%'
+   or member_id like '%'|| #{searchWord}|| '%' 
+   or member_num like '%'|| #{searchWord}|| '%'
+	</if>
+	</where>
+ ) sub1
+where rn between #{startRow} and #{endRow}
+</select>
+
+<select id= "memberAutoNum" resultType="string">
+select concat('mem',coalesce(max(substring(member_num,4)::integer),100000)+1) 
+from members;
+</select>
+
+<delete id="membersDelete" parameterType="string">
+delete from members 
+where member_num in 
+	<foreach collection="memDels" item="memberNum" open="(" close=")"
+		 index = "index" separator =",">
+ 		#{memberNum}
+	</foreach>
+</delete>
+
+<delete id="memberDelete" parameterType="string">
+	delete from members
+	<trim prefix="where" prefixOverrides="AND | OR" suffixOverrides="AND | OR">
+	and member_num=#{memberNum}
+	</trim>
+</delete>
+
+<select id ="memberSelectOne" parameterType="string" resultType="mem">
+select  <include refid="memberColumnsBase" />
+from members
+where member_num = #{memberNum}
+</select>
+
+<update id="memberUpdate" parameterType="mem">
+	update members
+	   <trim prefix="set" suffixOverrides=",">
+	   
+	   	member_Name = #{memberName},
+	   	member_addr = #{memberAddr},
+	   
+	   <choose>
+	   		<when test="memberAddrDetail !=null">
+	  		Member_Addr_detail = #{memberAddrDetail},
+	   		</when>
+	  		<otherwise>
+	  		 member_addr_detail = null,
+	  		</otherwise>
+	   </choose>
+	   
+	   		member_Post = #{memberPost},
+			gender = #{gender},
+			member_Phone1 = #{memberPhone1},
+			<choose>
+				<when test="memberPhone2 != null">
+					member_Phone2 =#{memberPhone2},
+				</when>
+				<when test="memberPhone2 == null">
+					member_Phone2 = null,
+				</when>	
+			</choose>
+			member_Email =#{memberEmail},
+			member_Birth = #{memberBirth},
+			point = #{point} 
+		</trim>
+		<where>		
+		member_num = #{memberNum}
+		</where>
+	   
+</update>
+
+<select id="memberCount" parameterType="string" resultType="integer">
+   select count(*) from members
+   <if test='searchWord != null'>
+	   <where>
+	   member_name like '%'|| #{searchWord}|| '%'
+	   or member_id like '%'|| #{searchWord}|| '%' 
+	   or member_num like '%'|| #{searchWord}|| '%'
+	   </where>
+</if>
+
+</select>
+
+
+</mapper>

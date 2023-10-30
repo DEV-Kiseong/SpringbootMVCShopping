@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC    
+   "-//mybatis.org//DTD Mapper 3.0//EN" 
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="springBootMVCShopping.mapper.MemberMyMapper">
+<update id="memberInfoUpdate" parameterType="mem">
+	update members
+	   <trim prefix="set" suffixOverrides=",">
+	   
+	   	member_Name = #{memberName},
+	   	member_addr = #{memberAddr},
+	   
+	   <choose>
+	   		<when test="memberAddrDetail !=null">
+	  		Member_Addr_detail = #{memberAddrDetail},
+	   		</when>
+	  		<otherwise>
+	  		 member_addr_detail = null,
+	  		</otherwise>
+	   </choose>
+	   
+	   		member_Post = #{memberPost},
+			gender = #{gender},
+			member_Phone1 = #{memberPhone1},
+			<choose>
+				<when test="memberPhone2 != null">
+					member_Phone2 =#{memberPhone2},
+				</when>
+				<when test="memberPhone2 == null">
+					member_Phone2 = null,
+				</when>	
+			</choose>
+			member_Email =#{memberEmail},
+			member_Birth = #{memberBirth},
+			
+		</trim>
+		<where>		
+		member_id = #{memberId}
+		</where>
+	   
+</update>
+<delete id="memberDrop" parameterType="string">
+delete from members
+where member_id = #{memberId}
+</delete>
+<update id="memberPwUpdate">
+	update members
+	set member_pw = #{arg0}
+	where member_id = #{arg1}
+</update>
+<sql id="memberColumnsBase">
+               member_num memberNum,member_id memberId,member_pw memberPw,member_name memberName,member_addr memberAddr
+               , member_addr_detail memberAddrDetail, member_post memberPost, member_phone1 memberPhone1,member_phone2 memberPhone2
+               , member_regist memberRegist, member_birth memberBirth,  member_email memberEmail, member_email_conf memberEmailConf
+               , point , gender
+
+
+</sql>
+<select id="memberInfo" parameterType="string" resultType="mem">
+select <include refid="memberColumnsBase" />
+from members
+where member_id = #{memberId}
+</select>
+</mapper>
