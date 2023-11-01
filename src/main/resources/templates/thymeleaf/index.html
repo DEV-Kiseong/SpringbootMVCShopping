@@ -38,5 +38,22 @@
 </table>
 </form>
 </div>
+<table align="center" width="600">
+	<tr>
+		<th:block th:each ="dto,idx : ${list}">
+		<td><a th:href="|corner/detailView/${dto.goodsNum}|">
+		<img src="|/static/upload/${dto.goodsMainStore}|"><br/>
+			[[${dto.goodsName}]]<br/>
+			[[${dto.goodsPrice}]]<br/>
+			<span th:if="${dto.deliveryCost ==0}" >무료배송</span>
+			<span th:if="${dto.deliveryCost !=0}" th:text="${dto.deliveryCost}"></span>
+			</a>
+		</td>
+			<th:block th:if="${idx.count %3 == 0}" th:utext="'</tr><tr>'" />
+
+		</th:block>
+	</tr>
+</table>
+
 </body>
 </html>
