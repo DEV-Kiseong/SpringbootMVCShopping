@@ -23,9 +23,11 @@ public class MainGoodsListService {
 		List<GoodsDTO> list = cartWishMapper.goodsSelectAll(goodsNum);
 		AuthInfoDTO auth = (AuthInfoDTO)session.getAttribute("auth");		
 		if(auth != null) {
-			MemberDTO dto = memberMyMapper.memberInfo(auth.getUserId());
-			Integer i = cartWishMapper.wishGoodsSelect(goodsNum, dto.getMemberNum());
-			model.addAttribute("wish", i);
+			if(auth.getGrade().equals("mem")) {
+				MemberDTO dto = memberMyMapper.memberInfo(auth.getUserId());
+				Integer i = cartWishMapper.wishGoodsSelect(goodsNum, dto.getMemberNum());
+				model.addAttribute("wish", i);
+			}
 		}		
 		model.addAttribute("list",list);
 	}

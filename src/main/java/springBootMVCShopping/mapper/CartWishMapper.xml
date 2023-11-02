@@ -3,6 +3,11 @@
 	"-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="springBootMVCShopping.mapper.CartWishMapper">
+<sql id="goodsBaseColumns">
+	goods_num,goods_name,goods_price,goods_content,goods_main_store,goods_main_store_img,
+	goods_images,goods_images_img,delivery_cost,visit_count,emp_num,goods_regist,
+	update_emp_num,goods_update_date
+</sql>
 <resultMap type="goods" id="goodsResultMap">
 	<id column = "goods_num" jdbcType="VARCHAR" property="goodsNum"></id>
 	<result column="goods_name" jdbcType="VARCHAR" property="goodsName" />
@@ -20,9 +25,7 @@
 	<result column="goods_update_date" jdbcType="DATE" property="goodsUpdateDate" />
 </resultMap>
 <select id="goodsSelectAll" resultMap="goodsResultMap" parameterType="string"> 
-select goods_num,goods_name,goods_price,goods_content,goods_main_store,goods_main_store_img,
-goods_images,goods_images_img,delivery_cost,visit_count,emp_num,goods_regist,
-update_emp_num,goods_update_date
+select <include refid="goodsBaseColumns" />
 from goods
 <where>
 	<if test="goodsNum !=null">
@@ -42,6 +45,29 @@ values(#{arg0}, #{arg1}, now())
 delete from wish
 where goods_num = #{arg0} and member_num = #{arg1}
 </delete>
+<select id="wishGoodsList" parameterType="string" resultMap="goodsResultMap">
+select <include refid="goodsBaseColumns" />
+from goods
+where goods_num in (select goods_num from wish where member_num = #{memberNum})
+</select>
+<delete id="wishGoodsDelete">
+delete from wish
+where member_num = #{memberNum}and goods_num in
+<foreach collection="goodsNums" item="goodsNum" open="(" close=")" index="index" separator=","> 
+	#{goodsNum}
+</foreach>
+</delete>
+<insert id="cartInsert" parameterType="cart">
+merge into cart c
+using (select goods_num from goods where goods_num = #{goodsNum}) g
+on (c.goods_num = g.goods_num and c.member_num = #{memberNum})
+WHEN MATCHED THEN
+update set
+cart_qty = cart_qty + #{cartQty}
+when not matched then
+insert(member_num, goods_num, cart_date, cart_qty)
+values(#{goodsNum},#{memberNum}, now(),#{cartQty})
+</insert>
 </mapper>
 
 
