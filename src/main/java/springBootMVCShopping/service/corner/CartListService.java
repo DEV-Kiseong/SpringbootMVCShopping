@@ -1,34 +1,30 @@
 package springBootMVCShopping.service.corner;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 
 import jakarta.servlet.http.HttpSession;
 import springBootMVCShopping.domain.AuthInfoDTO;
-import springBootMVCShopping.domain.CartDTO;
+import springBootMVCShopping.domain.CartGoodsDTO;
 import springBootMVCShopping.domain.MemberDTO;
 import springBootMVCShopping.mapper.CartWishMapper;
 import springBootMVCShopping.mapper.MemberMyMapper;
 
 @Service
-public class CartInsertService {
+public class CartListService {
 	@Autowired
 	MemberMyMapper memberMyMapper;
 	@Autowired
 	CartWishMapper cartWishMapper;
-	public String execute(String goodsNum, Integer qty, HttpSession session) {
+	public void execute(Model model, HttpSession session) {
 		AuthInfoDTO auth = (AuthInfoDTO)session.getAttribute("auth");
-		if(auth.getGrade().equals("mem")) {
-			MemberDTO  memDto = memberMyMapper.memberInfo(auth.getUserId());
-			CartDTO dto = new CartDTO();
-			dto.setCartQty(qty);
-			dto.setGoodsNum(goodsNum);
-			dto.setMemberNum(memDto.getMemberNum());
-			cartWishMapper.cartInsert(dto);
-			return "200";
-		}else {
-			return "999";
-		}
+		MemberDTO memDto = memberMyMapper.memberInfo(auth.getUserId());
+		List<CartGoodsDTO> list = cartWishMapper.cartList(memDto.getMemberNum(),null);
+		Integer sumPrice = cartWishMapper.sumPrice(memDto.getMemberNum());
+		model.addAttribute("list", list);
+		model.addAttribute("sumPrice", sumPrice);
 	}
-
 }

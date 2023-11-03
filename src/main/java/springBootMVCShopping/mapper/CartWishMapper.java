@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import springBootMVCShopping.domain.CartDTO;
+import springBootMVCShopping.domain.CartGoodsDTO;
 import springBootMVCShopping.domain.GoodsDTO;
 
 @Mapper
@@ -15,7 +16,14 @@ public interface CartWishMapper {
 	public Integer wishInsert(String goodsNum,String memberNum);
 	public Integer wishDelete(String goodsNum,String memberNum);
 	public List<GoodsDTO> wishGoodsList(String memberNum);
-	public int wishGoodsDelete(@Param("goodsNums") String wishGoodsDels[], @Param("memberNum")String memberNum);
+	public int wishGoodsDelete(@Param("goodsNums") String wishGoodsDels[]
+							, @Param("memberNum")String memberNum);
 	public int cartInsert(CartDTO dto);
+	public List<CartGoodsDTO> cartList(@Param("memberNum") String memberNum
+			  						,@Param("goodsNums") String [] prodCk);
+	public Integer sumPrice(String memberNum);
+	public int goodsNumsDelete(CartDTO dto);
+	public int goodsNumDelete(@Param("goodsNum") String goodsNum, @Param("memberNum")String memberNum);
+	public int cartQtyDown(String goodsNum,String memberNum);
 	
 }

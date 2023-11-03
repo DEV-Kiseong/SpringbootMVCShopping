@@ -21,9 +21,9 @@ public class AuthInfoDTO {
 	String pwColumnName;
 	String userIdColumName;
 	
-	public AuthInfoDTO(String userId, String userPw, String userName, String grade, String userEmail,
-			String userEmailCheck) {
-		super();
+	public AuthInfoDTO(String userId, String userPw, String userName
+			, String grade, String userEmail,String userEmailCheck) {
+		
 		this.userId = userId;
 		this.userPw = userPw;
 		this.userName = userName;

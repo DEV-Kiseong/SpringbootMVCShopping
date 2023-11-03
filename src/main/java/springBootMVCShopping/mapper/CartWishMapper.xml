@@ -4,72 +4,122 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="springBootMVCShopping.mapper.CartWishMapper">
 <sql id="goodsBaseColumns">
-	goods_num,goods_name,goods_price,goods_content,goods_main_store,goods_main_store_img,
-	goods_images,goods_images_img,delivery_cost,visit_count,emp_num,goods_regist,
-	update_emp_num,goods_update_date
+	   goods_num, goods_name,goods_price,goods_content,goods_main_store,
+	   goods_main_store_img,goods_images,goods_images_img,delivery_cost,visit_count,
+	   emp_num,goods_regist,update_emp_num,goods_update_date
 </sql>
 <resultMap type="goods" id="goodsResultMap">
-	<id column = "goods_num" jdbcType="VARCHAR" property="goodsNum"></id>
-	<result column="goods_name" jdbcType="VARCHAR" property="goodsName" />
-	<result column="goods_price" jdbcType="BIGINT" property="goodsPrice" />
-	<result column="delivery_cost" jdbcType="BIGINT" property="deliveryCost" />
-	<result column="goods_content" jdbcType="VARCHAR" property="goodsContent" />
-	<result column="emp_num" jdbcType="VARCHAR" property="empNum" />
-	<result column="goods_main_store" jdbcType="VARCHAR" property="goodsMainStore" />
-	<result column="goods_main_store_img" jdbcType="VARCHAR" property="goodsMainStoreImg" />
-	<result column="goods_images" jdbcType="VARCHAR" property="goodsImages" />
-	<result column="goods_images_img" jdbcType="VARCHAR" property="goodsImagesImg" />
-	<result column="visit_count" jdbcType="BIGINT" property="visitCount" />
-	<result column="goods_regist" jdbcType="DATE" property="goodsRegist" />
-	<result column="update_emp_num" jdbcType="VARCHAR" property="updateEmpNum" />
-	<result column="goods_update_date" jdbcType="DATE" property="goodsUpdateDate" />
+	<id column="goods_num" jdbcType="VARCHAR" property="goodsNum"/>
+	<result column="goods_name" jdbcType="VARCHAR" property="goodsName"/>
+	<result column="goods_price" jdbcType="BIGINT" property="goodsPrice"/>
+	<result column="delivery_cost" jdbcType="BIGINT" property="deliveryCost"/>
+	<result column="goods_content" jdbcType="VARCHAR" property="goodsContent"/>
+	<result column="emp_num" jdbcType="VARCHAR" property="empNum"/>
+	<result column="goods_main_store" jdbcType="VARCHAR" property="goodsMainStore"/>
+	<result column="goods_main_store_img" jdbcType="VARCHAR" property="goodsMainStoreImg"/>
+	<result column="goods_images" jdbcType="VARCHAR" property="goodsImages"/>
+	<result column="goods_images_img" jdbcType="VARCHAR" property="goodsImagesImg"/>
+	<result column="visit_count" jdbcType="BIGINT" property="visitCount"/>
+	<result column="goods_regist" jdbcType="DATE" property="goodsRegist"/>
+	<result column="update_emp_num" jdbcType="VARCHAR" property="updateEmpNum"/>
+	<result column="goods_update_date" jdbcType="DATE" property="goodsUpdateDate"/>
 </resultMap>
-<select id="goodsSelectAll" resultMap="goodsResultMap" parameterType="string"> 
+<select id="goodsSelectAll" resultMap="goodsResultMap">
 select <include refid="goodsBaseColumns" />
 from goods
 <where>
-	<if test="goodsNum !=null">
-		goods_num = #{goodsNum}
+	<if test="goodsNum != null">
+		goods_Num = #{goodsNum} 
 	</if>
 </where>
 </select>
-<select id="wishGoodsSelect" resultType="Integer">
+<select id="wishGoodsSelect" resultType="integer">
 select 1 from wish
 where goods_num = #{arg0} and member_num = #{arg1}
 </select>
 <insert id="wishInsert">
-insert into wish (goods_num, member_num, wish_date)
-values(#{arg0}, #{arg1}, now())
+	insert into wish (goods_num, member_num , wish_date )
+	values(#{arg0},#{arg1},now())
 </insert>
 <delete id="wishDelete">
-delete from wish
-where goods_num = #{arg0} and member_num = #{arg1}
+	DELETE FROM wish
+	where goods_num = #{arg0} and member_num = #{arg1}
 </delete>
+
 <select id="wishGoodsList" parameterType="string" resultMap="goodsResultMap">
 select <include refid="goodsBaseColumns" />
 from goods
 where goods_num in (select goods_num from wish where member_num = #{memberNum})
 </select>
-<delete id="wishGoodsDelete">
-delete from wish
-where member_num = #{memberNum}and goods_num in
-<foreach collection="goodsNums" item="goodsNum" open="(" close=")" index="index" separator=","> 
-	#{goodsNum}
+<delete id="wishGoodsDeletes" >
+delete from wish 
+where member_num = #{memberNum} 
+and goods_num in 
+<foreach collection="goodsNums" item="goodsNum" open="(" close=")" index="index" separator=",">
+		#{goodsNum}
 </foreach>
 </delete>
-<insert id="cartInsert" parameterType="cart">
+<insert id="cartInsert" parameterType="cart" >
 merge into cart c
-using (select goods_num from goods where goods_num = #{goodsNum}) g
+using (select goods_Num from goods where goods_num = #{goodsNum}) g
 on (c.goods_num = g.goods_num and c.member_num = #{memberNum})
 WHEN MATCHED THEN
 update set
 cart_qty = cart_qty + #{cartQty}
-when not matched then
-insert(member_num, goods_num, cart_date, cart_qty)
-values(#{goodsNum},#{memberNum}, now(),#{cartQty})
+WHEN not MATCHED THEN
+insert (MEMBER_NUM, GOODS_NUM, CART_DATE, CART_QTY)
+values(#{memberNum},#{goodsNum},now(),#{cartQty})
 </insert>
+<resultMap type="cartGoodsDTO" id="CartListResultMap">
+	<result column="total_price" jdbcType="BIGINT"  property="totalPrice"/>
+	
+	<association property="goodsDTO" javaType="goods" resultMap="goodsResultMap" />
+	<association property="cartDTO" javaType="cart" >
+		<result column="CART_QTY" jdbcType="BIGINT" property="cartQty"/>
+		<result column="CART_DATE" jdbcType="DATE" property="cartDate"/>
+		<result column="MEMBER_NUM" jdbcType="VARCHAR" property="memberNum"/>
+	</association>
+</resultMap>
+<select id="cartList" parameterType="string" resultMap="CartListResultMap">
+select c.GOODS_NUM, goods_name, goods_price, goods_main_store, delivery_Cost 
+	  ,CART_QTY , CART_DATE, MEMBER_NUM 
+	  , goods_price * CART_QTY total_price
+from cart c, goods g
+<trim prefix="where" prefixOverrides="AND | OR">
+	c.GOODS_NUM = g.GOODS_NUM and MEMBER_NUM = #{memberNum}
+	<if test="goodsNums != null">
+	    and g.goods_num in 
+		<foreach collection="goodsNums" item="goodsNum" close=")" open="(" separator=","
+				index="index">
+			#{goodsNum}
+		</foreach>
+	</if>
+</trim>
+</select>
+<select id="sumPrice" parameterType="string" resultType="integer">
+	select sum(goods_price * CART_QTY + delivery_Cost) 
+	from goods g, cart c
+	where g.goods_num = c.goods_num and member_num = #{memberNum}
+	group by member_num
+</select>
+<delete id="goodsNumsDelete" parameterType="cart">
+	delete from cart
+	where member_num = #{memberNum} 
+	and goods_num in <foreach collection="goodsNums" item="goodsNum" open="(" 
+			close=")" separator="," index="index">
+		#{goodsNum}
+	</foreach>
+</delete>
+<delete id="goodsNumDelete" >
+	delete from cart
+	where goods_num = #{goodsNum} and member_num = #{memberNum}
+</delete>
+<update id="cartQtyDown" >
+	update cart
+	set cart_qty = cart_qty - 1
+	where goods_num = #{arg0} and member_num = #{arg1}
+</update>
 </mapper>
-
 
 
 

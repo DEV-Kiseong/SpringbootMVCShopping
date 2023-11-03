@@ -11,24 +11,19 @@ import springBootMVCShopping.mapper.CartWishMapper;
 import springBootMVCShopping.mapper.MemberMyMapper;
 
 @Service
-public class CartInsertService {
+public class GoodsCartDelsService {
 	@Autowired
 	MemberMyMapper memberMyMapper;
 	@Autowired
 	CartWishMapper cartWishMapper;
-	public String execute(String goodsNum, Integer qty, HttpSession session) {
-		AuthInfoDTO auth = (AuthInfoDTO)session.getAttribute("auth");
-		if(auth.getGrade().equals("mem")) {
-			MemberDTO  memDto = memberMyMapper.memberInfo(auth.getUserId());
-			CartDTO dto = new CartDTO();
-			dto.setCartQty(qty);
-			dto.setGoodsNum(goodsNum);
-			dto.setMemberNum(memDto.getMemberNum());
-			cartWishMapper.cartInsert(dto);
-			return "200";
-		}else {
-			return "999";
-		}
+	public String execute(String[] goodsNums ,  HttpSession session) {
+		AuthInfoDTO auth  = (AuthInfoDTO)session.getAttribute("auth");
+		MemberDTO memDto = memberMyMapper.memberInfo(auth.getUserId());
+		CartDTO  dto = new CartDTO();
+		dto.setMemberNum(memDto.getMemberNum());
+		dto.setGoodsNums(goodsNums);
+		int i = cartWishMapper.goodsNumsDelete(dto);
+		if(i >= 1) return "200";
+		else return "900";
 	}
-
 }
