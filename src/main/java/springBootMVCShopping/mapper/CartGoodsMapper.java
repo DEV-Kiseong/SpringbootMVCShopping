@@ -13,5 +13,6 @@ public interface CartGoodsMapper {
 	public CartDTO cartSelect(Integer cartNum);
 	public CartGoodsDTO goodsPriceMulCartQty(@Param("goodsNum")String goodsNum,
 			@Param("memberNum") String memberNum);
+	public int cartGoodsDeletes(CartDTO dto);
 	
 }
